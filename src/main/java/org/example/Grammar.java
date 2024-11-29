@@ -111,7 +111,7 @@ public class Grammar {
 
             lineRead = bufferedReader.readLine();
             while(lineRead != null) {
-                List<String> elem = Arrays.asList(lineRead.split("\\s+"));
+                List<String> elem = Arrays.asList(lineRead.split("\\|"));
                 List<String> value = setOfProductions.get(elem.get(0));
                 if(value == null) {
                     List<String> newValue = new ArrayList<>();

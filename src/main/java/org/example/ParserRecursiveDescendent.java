@@ -1,8 +1,10 @@
 package org.example;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class ParserRecursiveDescendent {
     //TODO: Tests!!!!
@@ -28,10 +30,10 @@ public class ParserRecursiveDescendent {
     }
 
     public void Expand() {
-        String currentState = this.inputStack.pop();
-        String firstProd = this.grammar.getSetOfProductions().get(currentState).getFirst();
-        this.inputStack.push(firstProd);
-        this.workingStack.push(new Pair<>(currentState, 0));
+        String currentSymbol = this.inputStack.pop();
+        List<String> firstProd = Arrays.stream(this.grammar.getSetOfProductions().get(currentSymbol).getFirst().split("\\s+")).toList().reversed();
+        firstProd.forEach(this.inputStack::push);
+        this.workingStack.push(new Pair<>(currentSymbol, 0));
     }
 
     public void Advance() {
@@ -52,19 +54,23 @@ public class ParserRecursiveDescendent {
 
     public void AnotherTry() {
         Pair<String, Integer> head = this.workingStack.pop();
-        this.inputStack.pop();
-        List<String> prods = this.grammar.setOfProductions.get(head.getFirstElement());
+        String value = head.getFirstElement();
+        Integer index = head.getSecondElement();
 
-        if(head.getSecondElement() + 1 < prods.size()) {
+        this.inputStack.pop();
+        List<String> prods = this.grammar.setOfProductions.get(value);
+
+
+        if(index + 1 < prods.size()) {
             this.state = "q";
-            head.setSecondElement(head.getSecondElement() + 1);
+            head.setSecondElement(index + 1);
             this.workingStack.push(head);
-            this.inputStack.push(prods.get(head.getSecondElement()));
-        } else if (this.position == 1 && head.getFirstElement().equals(grammar.initialState)) {
+            Arrays.stream(prods.get(index).split("\\s+")).toList().reversed().forEach(this.inputStack::push);
+        } else if (this.position == 1 && value.equals(grammar.initialState)) {
             this.state = "e";
         }
         else {
-            this.inputStack.push(head.getFirstElement());
+            this.inputStack.push(value);
         }
     }
 
