@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class FileScan {
+public class Grammar {
 
     public final String filePath;
     public List<String> setOfNonterminal;
@@ -15,7 +15,7 @@ public class FileScan {
     public Map<String, List<String>> setOfProductions = new HashMap<>();
 
 
-    public FileScan(String filePath) {
+    public Grammar(String filePath) {
         this.filePath = filePath;
         this.initializeElements();
     }
