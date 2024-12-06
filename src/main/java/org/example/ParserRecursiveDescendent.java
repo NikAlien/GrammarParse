@@ -25,8 +25,46 @@ public class ParserRecursiveDescendent {
         this.inputStack.push(grammar.initialState);
     }
 
-    public void  recursiveDescendentParsing(String w) {
-        // TODO: week 10
+    public void  recursiveDescendentParsing(String w) throws Exception {
+        config();
+        int n = w.length();
+        while(!state.equals("f") && !state.equals("e")) {
+            if (state.equals("q")) {
+                if(position == n && inputStack.isEmpty()) {
+                    Success();
+                }
+                else {
+                    if(grammar.isNonTerminal(inputStack.peek())) {
+                        Expand();
+                    }
+                    else{
+                        if(position != n && inputStack.peek().equals(String.valueOf(w.charAt(position)))) {
+                            Advance();
+                        }
+                        else {
+                            MomentaryInsuccess();
+                        }
+                    }
+                }
+            }
+            else if(state.equals("b")) {
+                if(grammar.isTerminal(workingStack.peek().getFirstElement())) {
+                    Back();
+                }
+                else {
+                    AnotherTry();
+                }
+            }
+        }
+        if(state.equals("e")) {
+            System.out.println("Error!");
+        }
+        else{
+            System.out.println(this.state);
+            System.out.println(this.position);
+            System.out.println(this.workingStack.toString());
+            System.out.println(this.inputStack.toString());
+        }
     }
 
     public void Expand() {
@@ -52,20 +90,26 @@ public class ParserRecursiveDescendent {
         this.inputStack.push(elem.getFirstElement());
     }
 
-    public void AnotherTry() {
+    public void AnotherTry() throws Exception {
         Pair<String, Integer> head = this.workingStack.pop();
         String value = head.getFirstElement();
         Integer index = head.getSecondElement();
 
-        this.inputStack.pop();
         List<String> prods = this.grammar.setOfProductions.get(value);
+        List<String> currentProduction = Arrays.stream(prods.get(index).split("\\s+")).toList();
 
+        for(String prod : currentProduction) {
+            if(prod.equals(inputStack.peek()))
+                inputStack.pop();
+            else
+                throw new Exception("This should not be possible");
+        }
 
         if(index + 1 < prods.size()) {
             this.state = "q";
             head.setSecondElement(index + 1);
             this.workingStack.push(head);
-            Arrays.stream(prods.get(index).split("\\s+")).toList().reversed().forEach(this.inputStack::push);
+            Arrays.stream(prods.get(index + 1).split("\\s+")).toList().reversed().forEach(this.inputStack::push);
         } else if (this.position == 1 && value.equals(grammar.initialState)) {
             this.state = "e";
         }
