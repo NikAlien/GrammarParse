@@ -14,6 +14,21 @@ public class ParserRecursiveDescendent {
     private Stack<Pair<String, Integer>> workingStack = new Stack<>();
     private Stack<String> inputStack = new Stack<>();
 
+    public String getState() {
+        return state;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public Stack<Pair<String, Integer>> getWorkingStack() {
+        return workingStack;
+    }
+
+    public Stack<String> getInputStack() {
+        return inputStack;
+    }
 
     public ParserRecursiveDescendent(Grammar grammar) {
         this.grammar = grammar;
@@ -31,15 +46,20 @@ public class ParserRecursiveDescendent {
 
     public void Expand() {
         String currentSymbol = this.inputStack.pop();
-        List<String> firstProd = Arrays.stream(this.grammar.getSetOfProductions().get(currentSymbol).getFirst().split("\\s+")).toList().reversed();
-        firstProd.forEach(this.inputStack::push);
+        String firstProd = this.grammar.getSetOfProductions().get(currentSymbol).getFirst();
+        this.inputStack.push(firstProd);
         this.workingStack.push(new Pair<>(currentSymbol, 0));
+
     }
 
     public void Advance() {
         this.position++;
         String elem = this.inputStack.pop();
-        this.workingStack.push(new Pair<>(elem, -1));
+        List<String> auxiliar = Arrays.stream(elem.split("\\s+")).toList();
+        this.workingStack.push(new Pair<>(auxiliar.getFirst(), -1));
+
+        auxiliar = auxiliar.subList(1, auxiliar.size());
+        this.inputStack.push(String.join(" ", auxiliar));
     }
 
     public void MomentaryInsuccess() {
@@ -49,7 +69,8 @@ public class ParserRecursiveDescendent {
     public void Back() {
         this.position--;
         Pair<String, Integer> elem = this.workingStack.pop();
-        this.inputStack.push(elem.getFirstElement());
+        String head = this.inputStack.pop();
+        this.inputStack.push(elem.getFirstElement() + " " + head);
     }
 
     public void AnotherTry() {
@@ -60,13 +81,12 @@ public class ParserRecursiveDescendent {
         this.inputStack.pop();
         List<String> prods = this.grammar.setOfProductions.get(value);
 
-
         if(index + 1 < prods.size()) {
             this.state = "q";
             head.setSecondElement(index + 1);
             this.workingStack.push(head);
-            Arrays.stream(prods.get(index).split("\\s+")).toList().reversed().forEach(this.inputStack::push);
-        } else if (this.position == 1 && value.equals(grammar.initialState)) {
+            this.inputStack.push(prods.get(index));
+        } else if (this.position == 0 && value.equals(grammar.initialState)) {
             this.state = "e";
         }
         else {
