@@ -89,6 +89,14 @@ public class Grammar {
         return setOfProductions;
     }
 
+    public boolean isTerminal(String terminal) {
+        return setOfTerminals.contains(terminal);
+    }
+
+    public boolean isNonTerminal(String terminal) {
+        return setOfNonterminal.contains(terminal);
+    }
+
     public boolean checkIfCFG() {
         for(String key: this.setOfProductions.keySet()) {
             if(!this.setOfNonterminal.contains(key))
